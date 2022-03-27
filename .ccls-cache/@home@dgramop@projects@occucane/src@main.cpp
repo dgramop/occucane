@@ -16,20 +16,23 @@ int rightshift_log(long duration) {
 }
 
 void pulses(int count) {
-	if(count < 1) count = 1; //minmum one vibration, even for close stuff
-	if(count > 10) count = 10; //minmum one vibration, even for close stuff
-
+	
 	Serial.print("haptics: ");
 	Serial.print(count);
 	Serial.println(" pulses");
 
-	for(int i=0; i < count; i++) {
+	digitalWrite(MOTOR, HIGH);
+	delay(count);
+
+	digitalWrite(MOTOR, LOW);
+
+/*	for(int i=0; i < count; i++) {
 		digitalWrite(MOTOR, HIGH);
 		delay(50);
 
 		digitalWrite(MOTOR, LOW);
 		delay(50);
-	}
+	}*/
 }
 
 void setup() {
@@ -55,12 +58,17 @@ void loop() {
 	Serial.print(duration);
 	Serial.println(" cm");
 
-	int computed = rightshift_log(distance - 30 > 1 ? distance - 30 : 1);
+	int computed = rightshift_log(distance - 40 > 1 ? distance - 40 : 1);
 	Serial.print(" computed log: ");
 	Serial.print(computed);
+	
+	//we want between 7 and 2
 
-	int num_pulses = 20/computed;
+	int num_pulses = 350/(computed - 2 > 0 ? computed - 2 : 1);
+	if(num_pulses < 1) num_pulses = 1; //minmum one vibration, even for close stuff
+	if(num_pulses > 1000) num_pulses = 1000; //minmum one vibration, even for close stuff
+
 	pulses(num_pulses); // between 5 and one pulses
 
-	delay(200);
+	delay(100);
 }
