@@ -4,6 +4,12 @@ const static int MOTOR = 7;
 const static int TX = 8;
 const static int RX = 9;
 
+// offset of pulses to add/subtract
+const static int LOG_OFFSET = 1; 
+
+// the number of centimeters to subtract from the distance
+const static int DISTANCE_OFFSET = 10; //specified in cm
+
 int rightshift_log(long duration) {
 	int lg = 0;
 	while(duration > 0) {
@@ -50,7 +56,7 @@ void loop() {
 	digitalWrite(TX, LOW);
 
 	long duration = pulseIn(RX, HIGH);
-	long distance = (duration*344)/10000;
+	long distance = (duration*344)/5000;
 
 	Serial.print("distance: ");
 	Serial.print(distance);
@@ -58,15 +64,15 @@ void loop() {
 	Serial.print(duration);
 	Serial.println(" cm");
 
-	int computed = rightshift_log(distance - 40 > 1 ? distance - 40 : 1);
+	int computed = rightshift_log(distance - DISTANCE_OFFSET > 1 ? distance - DISTANCE_OFFSET : 1);
 	Serial.print(" computed log: ");
 	Serial.print(computed);
 	
 	//we want between 7 and 2
 
-	int num_pulses = 350/(computed - 2 > 0 ? computed - 2 : 1);
+	int num_pulses = 500/(computed + LOG_OFFSET > 0 ? computed + LOG_OFFSET : 1);
 	if(num_pulses < 1) num_pulses = 1; //minmum one vibration, even for close stuff
-	if(num_pulses > 1000) num_pulses = 1000; //minmum one vibration, even for close stuff
+	if(num_pulses > 1000) num_pulses = 1000; //maximum vibration
 
 	pulses(num_pulses); // between 5 and one pulses
 
