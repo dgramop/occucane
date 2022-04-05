@@ -6,9 +6,10 @@ const static int RX = 9;
 
 // offset of pulses to add/subtract
 const static int LOG_OFFSET = 1; 
+const static bool NO_LOG = false;
 
 // the number of centimeters to subtract from the distance
-const static int DISTANCE_OFFSET = 10; //specified in cm
+const static int DISTANCE_OFFSET = 20; //specified in cm
 
 int rightshift_log(long duration) {
 	int lg = 0;
@@ -64,13 +65,18 @@ void loop() {
 	Serial.print(duration);
 	Serial.println(" cm");
 
-	int computed = rightshift_log(distance - DISTANCE_OFFSET > 1 ? distance - DISTANCE_OFFSET : 1);
+	int computed;
+	if(NO_LOG) {
+		computed = distance;
+	} else {
+		computed = rightshift_log(distance - DISTANCE_OFFSET > 1 ? distance - DISTANCE_OFFSET : 1);
+	}
 	Serial.print(" computed log: ");
 	Serial.print(computed);
 	
 	//we want between 7 and 2
 
-	int num_pulses = 500/(computed + LOG_OFFSET > 0 ? computed + LOG_OFFSET : 1);
+	int num_pulses = 750/(computed + LOG_OFFSET > 0 ? computed + LOG_OFFSET : 1);
 	if(num_pulses < 1) num_pulses = 1; //minmum one vibration, even for close stuff
 	if(num_pulses > 1000) num_pulses = 1000; //maximum vibration
 
