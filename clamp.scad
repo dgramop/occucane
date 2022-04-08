@@ -15,6 +15,7 @@ $hole_radius = $hole_diameter/2;
 $second_radius = $second_diameter/2;
 $head_width=0.8;
 $head_depth=0.2;
+$bolt_separation = 1;
 
 difference() {
     union() {
@@ -35,7 +36,7 @@ difference() {
         translate([$clamp_width/2 ,0,0]) difference() {
             translate([$bolt_space/2, 0, 0]) cube([$bolt_space,$clamp_width,$clamp_height], center=true);
             
-            translate([$bolt_space/2,0,-$clamp_height/2 + 0.6]) rotate([90,0,0]) {
+            translate([$bolt_space/2,0,-$bolt_separation/2]) rotate([90,0,0]) {
                 // bore hole
                 cylinder(h=$clamp_width+0.01, r=0.62/2, center=true);
                 
@@ -44,7 +45,7 @@ difference() {
                 translate([0, 0, $clamp_width/2 - $head_depth/2 ]) cylinder(h=$head_depth+0.01, r=$head_width/2, center=true);
             }
 
-            translate([$bolt_space/2,0,$clamp_height/2 - 0.6]) rotate([90,0,0]) {
+            translate([$bolt_space/2,0,$bolt_separation/2]) rotate([90,0,0]) {
                 cylinder(h=$clamp_width+0.01, r=0.62/2, center=true);
                 
                 translate([0, 0, -$clamp_width/2 + $head_depth/2 ]) cylinder(h=$head_depth+0.01, r=$head_width/2, center=true);
