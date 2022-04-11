@@ -1,15 +1,9 @@
 #include <Arduino.h>
+#include <Wire.h>
+#include <VL53L0X.h>
 
-const static int MOTOR = 7;
 const static int TX = 8;
 const static int RX = 9;
-
-// offset of pulses to add/subtract
-const static int LOG_OFFSET = 1; 
-const static bool NO_LOG = false;
-
-// the number of centimeters to subtract from the distance
-const static int DISTANCE_OFFSET = 20; //specified in cm
 
 int rightshift_log(long duration) {
 	int lg = 0;
@@ -22,16 +16,16 @@ int rightshift_log(long duration) {
 	return lg;
 }
 
+VL53L0X sensor;
+
+const int MOTOR = A2;
+
 void pulses(int count) {
 	
 	Serial.print("haptics: ");
 	Serial.print(count);
 	Serial.println(" pulses");
 
-	digitalWrite(MOTOR, HIGH);
-	delay(count);
-
-	digitalWrite(MOTOR, LOW);
 
 /*	for(int i=0; i < count; i++) {
 		digitalWrite(MOTOR, HIGH);
@@ -42,45 +36,40 @@ void pulses(int count) {
 	}*/
 }
 
-void setup() {
-	pinMode(MOTOR, OUTPUT);
+void setup()
+{
+  Serial.begin(115200);
+  Wire.begin();
 	pinMode(TX, OUTPUT);
 	pinMode(RX, INPUT);
-	Serial.begin(115200);
+	pinMode(MOTOR, OUTPUT);
+
+  sensor.setTimeout(500);
+  if (!sensor.init())
+  {
+    Serial.println("Failed to detect and initialize sensor!");
+    while (1) {}
+  }
+
+  // Start continuous back-to-back mode (take readings as
+  // fast as possible).  To use continuous timed mode
+  // instead, provide a desired inter-measurement period in
+  // ms (e.g. sensor.startContinuous(100)).
+  sensor.startContinuous();
 }
 
-void loop() {
-	digitalWrite(TX, LOW);
-	delayMicroseconds(2);
-	digitalWrite(TX, HIGH);
-	delayMicroseconds(10);
-	digitalWrite(TX, LOW);
+void loop()
+{
+	int reading = sensor.readRangeContinuousMillimeters();
+  Serial.print(reading);
+  if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
 
-	long duration = pulseIn(RX, HIGH);
-	long distance = (duration*344)/5000;
+	digitalWrite(MOTOR, HIGH);
+	delay(75);
+	digitalWrite(MOTOR, LOW);
+	reading -= 200; //subtract 20cm
+	reading = 0.25*reading;
+	delay(reading > 0 ? (reading < 900 ? reading : 900): 1);
 
-	Serial.print("distance: ");
-	Serial.print(distance);
-	Serial.print(" duration: ");
-	Serial.print(duration);
-	Serial.println(" cm");
-
-	int computed;
-	if(NO_LOG) {
-		computed = distance;
-	} else {
-		computed = rightshift_log(distance - DISTANCE_OFFSET > 1 ? distance - DISTANCE_OFFSET : 1);
-	}
-	Serial.print(" computed log: ");
-	Serial.print(computed);
-	
-	//we want between 7 and 2
-
-	int num_pulses = 750/(computed + LOG_OFFSET > 0 ? computed + LOG_OFFSET : 1);
-	if(num_pulses < 1) num_pulses = 1; //minmum one vibration, even for close stuff
-	if(num_pulses > 1000) num_pulses = 1000; //maximum vibration
-
-	pulses(num_pulses); // between 5 and one pulses
-
-	delay(100);
+  Serial.println();
 }
