@@ -3,7 +3,7 @@ $fn = 100;
 $cane_thickness = 1.6; //TODO: properly parameterize
 $second_thickness = 1.6;
 $tab_height = 1;
-$clamp_height = 3;
+$clamp_height = 4;
 $bolt_space = 1.0;
 $clamp_material_padding = 0.6;
 $clamp_width = $cane_thickness+$clamp_material_padding*2;
@@ -15,7 +15,7 @@ $hole_radius = $hole_diameter/2;
 $second_radius = $second_diameter/2;
 $head_width=0.8;
 $head_depth=0.2;
-$bolt_separation = 1.5;
+$bolt_separation = $clamp_height-2;
 
 difference() {
     union() {

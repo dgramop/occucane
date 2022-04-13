@@ -20,22 +20,6 @@ VL53L0X sensor;
 
 const int MOTOR = A2;
 
-void pulses(int count) {
-	
-	Serial.print("haptics: ");
-	Serial.print(count);
-	Serial.println(" pulses");
-
-
-/*	for(int i=0; i < count; i++) {
-		digitalWrite(MOTOR, HIGH);
-		delay(50);
-
-		digitalWrite(MOTOR, LOW);
-		delay(50);
-	}*/
-}
-
 void setup()
 {
   Serial.begin(115200);
@@ -58,18 +42,49 @@ void setup()
   sensor.startContinuous();
 }
 
+void delay_with_alarm(int time, int threshold) {
+	Serial.print("long wait for");
+	Serial.print(time);
+	if(time < 50) {
+		Serial.print("skip loop");
+		delay(time);
+		return;
+	}
+	while(time > 0) {
+		time -= 50;
+		delay(50);
+		int reading = sensor.readRangeContinuousMillimeters();
+		Serial.print("\nin loop got");
+		Serial.print(reading);
+
+		if(reading < threshold || (threshold == -1 && reading*0.1 < time)) {
+			Serial.print("early exit");
+			return;
+		}
+
+	}
+}
+
 void loop()
 {
 	int reading = sensor.readRangeContinuousMillimeters();
-  Serial.print(reading);
+	//delay_with_alarm(10000);
   if (sensor.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
 
 	digitalWrite(MOTOR, HIGH);
-	delay(75);
+	delay(25);
 	digitalWrite(MOTOR, LOW);
-	reading -= 200; //subtract 20cm
-	reading = 0.25*reading;
-	delay(reading > 0 ? (reading < 900 ? reading : 900): 1);
+		//reading -= 200; //subtract 20cm
+	Serial.print(reading);
+	if(reading > 8000) {
+		Serial.print("long wait");
+		//delay_with_alarm(10000, 800);
+		delay(500);
+
+	}
+	Serial.print("MM");
+	reading = 0.1*reading;
+	delay_with_alarm(reading, -1);
 
   Serial.println();
 }
