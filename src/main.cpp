@@ -43,10 +43,7 @@ void setup()
 }
 
 void delay_with_alarm(int time, int threshold) {
-	Serial.print("long wait for");
-	Serial.print(time);
 	if(time < 50) {
-		Serial.print("skip loop");
 		delay(time);
 		return;
 	}
@@ -54,11 +51,8 @@ void delay_with_alarm(int time, int threshold) {
 		time -= 50;
 		delay(50);
 		int reading = sensor.readRangeContinuousMillimeters();
-		Serial.print("\nin loop got");
-		Serial.print(reading);
 
 		if(reading < threshold || (threshold == -1 && reading*0.1 < time)) {
-			Serial.print("early exit");
 			return;
 		}
 
@@ -77,9 +71,8 @@ void loop()
 		//reading -= 200; //subtract 20cm
 	Serial.print(reading);
 	if(reading > 8000) {
-		Serial.print("long wait");
-		//delay_with_alarm(10000, 800);
-		delay(500);
+		delay_with_alarm(10000, 800);
+		//delay(500);
 
 	}
 	Serial.print("MM");

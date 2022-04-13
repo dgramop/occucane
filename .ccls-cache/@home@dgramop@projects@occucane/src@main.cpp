@@ -78,8 +78,8 @@ void loop()
 	Serial.print(reading);
 	if(reading > 8000) {
 		Serial.print("long wait");
-		//delay_with_alarm(10000, 800);
-		delay(500);
+		delay_with_alarm(10000, 800);
+		//delay(500);
 
 	}
 	Serial.print("MM");
